@@ -1,0 +1,102 @@
+ Cria o novo banco de dados para gestão de colaboradores
+CREATE DATABASE gestao_colaboradores;
+
+-- Seleciona o banco de dados para uso
+USE gestao_colaboradores;
+
+-- Tabela de endereços dos colaboradores
+-- O ideal é que esta tabela não tenha id_colaborador para ser mais genérica,
+-- mas mantive a estrutura original conforme solicitado.
+CREATE TABLE enderecos(
+    id_endereco INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    id_colaborador INT, -- Referência a qual colaborador este endereço pertence
+    pais VARCHAR(256),
+    estado VARCHAR(256),
+    cidade VARCHAR(256),
+    bairro VARCHAR(256),
+    rua VARCHAR(256),
+    numero VARCHAR(256)
+);
+
+-- Tabela principal de colaboradores
+CREATE TABLE colaboradores(
+    id_colaborador INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    nome_colaborador VARCHAR(256),
+    data_nascimento DATE,
+    numero_rg VARCHAR(256),
+    numero_cpf VARCHAR(256),
+    id_endereco_atual INT, -- ID do endereço onde o colaborador reside atualmente
+    data_admissao DATE,
+    id_endereco_historico INT, -- ID de um endereço anterior, para histórico
+    CONSTRAINT FK_id_endereco_historico
+    FOREIGN KEY (id_endereco_historico)
+        REFERENCES enderecos(id_endereco)
+);
+
+-- Tabela de histórico de cargos ocupados pelos colaboradores
+CREATE TABLE cargos_anteriores(
+    id_historico_cargo INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    id_colaborador INT,
+    titulo_cargo VARCHAR(256),
+    data_inicio_cargo DATE,
+    data_fim_cargo DATE,
+    CONSTRAINT FK_colaborador_cargo
+    FOREIGN KEY (id_colaborador)
+        REFERENCES colaboradores(id_colaborador)
+);
+
+-- Tabela de setores onde o colaborador foi lotado
+CREATE TABLE lotacoes_setor(
+    id_lotacao INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    id_colaborador INT,
+    nome_setor VARCHAR(256),
+    data_inicio_lotacao DATE,
+    data_fim_lotacao DATE,
+    CONSTRAINT FK_colaborador_setor
+    FOREIGN KEY (id_colaborador)
+        REFERENCES colaboradores(id_colaborador)
+);
+
+-- Tabela de dependentes dos colaboradores
+CREATE TABLE dependentes(
+    id_dependente INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    nome_completo_dependente VARCHAR(256),
+    data_nascimento_dependente DATE,
+    id_colaborador INT,
+    CONSTRAINT FK_dependente_colaborador
+    FOREIGN KEY (id_colaborador)
+        REFERENCES colaboradores(id_colaborador)
+);
+
+-- Inserção de dados de exemplo na tabela de endereços
+INSERT INTO enderecos (id_colaborador, pais, estado, cidade, bairro, rua, numero)
+VALUES 
+(1, 'Brasil', 'Rio de Janeiro', 'Rio de Janeiro', 'Copacabana', 'Avenida Atlântica', '1702'),
+(1, 'Brasil', 'Rio de Janeiro', 'Niterói', 'Icaraí', 'Rua Álvares de Azevedo', '123'),
+(2, 'Brasil', 'Minas Gerais', 'Belo Horizonte', 'Savassi', 'Avenida Cristóvão Colombo', '500');
+
+-- Inserção de dados de exemplo na tabela de colaboradores
+INSERT INTO colaboradores (nome_colaborador, data_nascimento, numero_rg, numero_cpf, id_endereco_atual, data_admissao, id_endereco_historico)
+VALUES 
+('João Pereira', '1988-02-20', 'RJ-1122334', '111.222.333-44', 1, '2023-01-15', 2),
+('Ana Oliveira', '1992-11-30', 'MG-5566778', '555.666.777-88', 3, '2023-02-20', 3);
+
+-- Inserção de histórico de cargos
+INSERT INTO cargos_anteriores (id_colaborador, titulo_cargo, data_inicio_cargo, data_fim_cargo)
+VALUES 
+(1, 'Analista Júnior', '2023-01-15', '2024-01-14'),
+(1, 'Analista Pleno', '2024-01-15', NULL), -- NULL indica cargo atual
+(2, 'Assistente Administrativo', '2023-02-20', '2024-02-19'),
+(2, 'Analista Financeiro', '2024-02-20', NULL);
+
+-- Inserção em lotações de setor
+INSERT INTO lotacoes_setor (id_colaborador, nome_setor, data_inicio_lotacao, data_fim_lotacao)
+VALUES 
+(1, 'Tecnologia', '2023-01-15', NULL),
+(2, 'Financeiro', '2023-02-20', NULL);
+
+-- Inserção de dependentes
+INSERT INTO dependentes (nome_completo_dependente, data_nascimento_dependente, id_colaborador)
+VALUES 
+('Pedro Pereira', '2018-07-22', 1),
+('Sofia Oliveira', '2020-01-15', 2);
